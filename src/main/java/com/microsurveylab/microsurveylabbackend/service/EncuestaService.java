@@ -1,0 +1,150 @@
+package com.microsurveylab.microsurveylabbackend.service;
+
+import com.microsurveylab.microsurveylabbackend.dto.EncuestaRequestDTO;
+import com.microsurveylab.microsurveylabbackend.dto.EncuestaResponseDTO;
+import com.microsurveylab.microsurveylabbackend.model.Encuesta;
+import com.microsurveylab.microsurveylabbackend.model.Opcion;
+import com.microsurveylab.microsurveylabbackend.repository.EncuestaRepository;
+import jakarta.transaction.Transactional;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@Transactional
+public class EncuestaService {
+
+    private final EncuestaRepository encuestaRepository;
+
+    public EncuestaService(EncuestaRepository encuestaRepository) {
+        this.encuestaRepository = encuestaRepository;
+    }
+
+    // ==========================
+    //        CRUD BÁSICO
+    // ==========================
+
+    public List<EncuestaResponseDTO> obtenerTodas() {
+        List<Encuesta> encuestas = encuestaRepository.findAll();
+        return encuestas.stream()
+                .map(this::mapearAResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    public EncuestaResponseDTO obtenerPorId(Long id) {
+        Encuesta encuesta = encuestaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Encuesta no encontrada con id: " + id));
+        return mapearAResponseDTO(encuesta);
+    }
+
+    public EncuestaResponseDTO crear(EncuestaRequestDTO request) {
+        validarOpciones(request.getOpciones());
+
+        Encuesta encuesta = new Encuesta();
+        encuesta.setPregunta(request.getPregunta());
+        encuesta.setDescripcion(request.getDescripcion());
+        encuesta.setActiva(true);
+
+        // Crear opciones y vincularlas a la encuesta
+        List<Opcion> opciones = new ArrayList<>();
+        for (String textoOpcion : request.getOpciones()) {
+            Opcion opcion = new Opcion();
+            opcion.setTexto(textoOpcion);
+            opcion.setEncuesta(encuesta);
+            opciones.add(opcion);
+        }
+        encuesta.setOpciones(opciones);
+
+        Encuesta guardada = encuestaRepository.save(encuesta);
+        return mapearAResponseDTO(guardada);
+    }
+
+    public EncuestaResponseDTO actualizar(Long id, EncuestaRequestDTO request) {
+        validarOpciones(request.getOpciones());
+
+        Encuesta encuesta = encuestaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Encuesta no encontrada con id: " + id));
+
+        encuesta.setPregunta(request.getPregunta());
+        encuesta.setDescripcion(request.getDescripcion());
+
+        // Limpiar opciones anteriores y reemplazarlas por las nuevas
+        // Gracias a orphanRemoval = true en la entidad, se borran en cascada
+        encuesta.getOpciones().clear();
+        encuestaRepository.flush(); // asegura la eliminación antes de agregar nuevas
+
+        List<Opcion> nuevasOpciones = new ArrayList<>();
+        for (String textoOpcion : request.getOpciones()) {
+            Opcion opcion = new Opcion();
+            opcion.setTexto(textoOpcion);
+            opcion.setEncuesta(encuesta);
+            nuevasOpciones.add(opcion);
+        }
+        encuesta.setOpciones(nuevasOpciones);
+
+        Encuesta actualizada = encuestaRepository.save(encuesta);
+        return mapearAResponseDTO(actualizada);
+    }
+
+    public void eliminar(Long id) {
+        boolean existe = encuestaRepository.existsById(id);
+        if (!existe) {
+            throw new RuntimeException("No se puede eliminar. Encuesta no encontrada con id: " + id);
+        }
+        encuestaRepository.deleteById(id);
+    }
+
+    public void activarEncuesta(Long id) {
+        Encuesta encuesta = encuestaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Encuesta no encontrada con id: " + id));
+        encuesta.setActiva(true);
+        encuestaRepository.save(encuesta);
+    }
+
+    public void desactivarEncuesta(Long id) {
+        Encuesta encuesta = encuestaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Encuesta no encontrada con id: " + id));
+        encuesta.setActiva(false);
+        encuestaRepository.save(encuesta);
+    }
+
+    // ==========================
+    //    MÉTODOS AUXILIARES
+    // ==========================
+
+    private void validarOpciones(List<String> opciones) {
+        if (opciones == null || opciones.size() < 2) {
+            throw new IllegalArgumentException("La encuesta debe tener al menos 2 opciones");
+        }
+
+        boolean tieneVacios = opciones.stream()
+                .anyMatch(op -> op == null || op.trim().isEmpty());
+
+        if (tieneVacios) {
+            throw new IllegalArgumentException("Todas las opciones deben tener texto");
+        }
+    }
+
+    private EncuestaResponseDTO mapearAResponseDTO(Encuesta encuesta) {
+        EncuestaResponseDTO dto = new EncuestaResponseDTO();
+        dto.setId(encuesta.getId());
+        dto.setPregunta(encuesta.getPregunta());
+        dto.setDescripcion(encuesta.getDescripcion());
+        dto.setActiva(encuesta.getActiva());
+        dto.setFechaCreacion(encuesta.getFechaCreacion());
+
+        List<EncuestaResponseDTO.OpcionRespuestaDTO> opcionesDTO =
+                encuesta.getOpciones().stream().map(opcion -> {
+                    EncuestaResponseDTO.OpcionRespuestaDTO o = new EncuestaResponseDTO.OpcionRespuestaDTO();
+                    o.setId(opcion.getId());
+                    o.setTexto(opcion.getTexto());
+                    return o;
+                }).collect(Collectors.toList());
+
+        dto.setOpciones(opcionesDTO);
+
+        return dto;
+    }
+}
