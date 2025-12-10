@@ -10,4 +10,6 @@ public interface VotoRepository extends JpaRepository<Voto, Long> {
     long countByEncuesta(Encuesta encuesta);
 
     long countByEncuestaAndOpcion(Encuesta encuesta, Opcion opcion);
+
+    void deleteByEncuesta(Encuesta encuesta);
 }
