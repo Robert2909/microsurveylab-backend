@@ -2,8 +2,10 @@ package com.microsurveylab.microsurveylabbackend.controller;
 
 import com.microsurveylab.microsurveylabbackend.dto.EncuestaRequestDTO;
 import com.microsurveylab.microsurveylabbackend.dto.EncuestaResponseDTO;
+import com.microsurveylab.microsurveylabbackend.dto.EncuestaUpdateDTO;
 import com.microsurveylab.microsurveylabbackend.service.EncuestaService;
 import jakarta.validation.Valid;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,39 +23,43 @@ public class EncuestaController {
         this.encuestaService = encuestaService;
     }
 
-    // GET /api/encuestas
     @GetMapping
     public List<EncuestaResponseDTO> obtenerTodas() {
         return encuestaService.obtenerTodas();
     }
 
-    // GET /api/encuestas/{id}
     @GetMapping("/{id}")
     public ResponseEntity<EncuestaResponseDTO> obtenerPorId(@PathVariable Long id) {
         EncuestaResponseDTO dto = encuestaService.obtenerPorId(id);
         return ResponseEntity.ok(dto);
     }
 
-    // POST /api/encuestas
     @PostMapping
     public ResponseEntity<EncuestaResponseDTO> crear(@Valid @RequestBody EncuestaRequestDTO request) {
         EncuestaResponseDTO creada = encuestaService.crear(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(creada);
     }
 
-    // PUT /api/encuestas/{id}
     @PutMapping("/{id}")
-    public ResponseEntity<EncuestaResponseDTO> actualizar(@PathVariable Long id,
-                                                          @Valid @RequestBody EncuestaRequestDTO request) {
-        EncuestaResponseDTO actualizada = encuestaService.actualizar(id, request);
-        return ResponseEntity.ok(actualizada);
+    public ResponseEntity<EncuestaResponseDTO> actualizarEncuesta(
+            @PathVariable Long id,
+            @RequestBody EncuestaUpdateDTO dto
+    ) {
+        try {
+            return ResponseEntity.ok(encuestaService.actualizarEncuesta(id, dto));
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
-    // DELETE /api/encuestas/{id}
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        encuestaService.eliminar(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Void> eliminarEncuesta(@PathVariable Long id) {
+        try {
+            encuestaService.eliminarEncuesta(id);
+            return ResponseEntity.noContent().build();
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping("/{id}/activar")

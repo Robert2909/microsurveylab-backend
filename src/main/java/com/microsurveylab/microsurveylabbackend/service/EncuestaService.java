@@ -2,10 +2,13 @@ package com.microsurveylab.microsurveylabbackend.service;
 
 import com.microsurveylab.microsurveylabbackend.dto.EncuestaRequestDTO;
 import com.microsurveylab.microsurveylabbackend.dto.EncuestaResponseDTO;
+import com.microsurveylab.microsurveylabbackend.dto.EncuestaUpdateDTO;
 import com.microsurveylab.microsurveylabbackend.model.Encuesta;
 import com.microsurveylab.microsurveylabbackend.model.Opcion;
 import com.microsurveylab.microsurveylabbackend.repository.EncuestaRepository;
 import jakarta.transaction.Transactional;
+import jakarta.persistence.EntityNotFoundException;
+
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -61,41 +64,6 @@ public class EncuestaService {
         return mapearAResponseDTO(guardada);
     }
 
-    public EncuestaResponseDTO actualizar(Long id, EncuestaRequestDTO request) {
-        validarOpciones(request.getOpciones());
-
-        Encuesta encuesta = encuestaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Encuesta no encontrada con id: " + id));
-
-        encuesta.setPregunta(request.getPregunta());
-        encuesta.setDescripcion(request.getDescripcion());
-
-        // Limpiar opciones anteriores y reemplazarlas por las nuevas
-        // Gracias a orphanRemoval = true en la entidad, se borran en cascada
-        encuesta.getOpciones().clear();
-        encuestaRepository.flush(); // asegura la eliminación antes de agregar nuevas
-
-        List<Opcion> nuevasOpciones = new ArrayList<>();
-        for (String textoOpcion : request.getOpciones()) {
-            Opcion opcion = new Opcion();
-            opcion.setTexto(textoOpcion);
-            opcion.setEncuesta(encuesta);
-            nuevasOpciones.add(opcion);
-        }
-        encuesta.setOpciones(nuevasOpciones);
-
-        Encuesta actualizada = encuestaRepository.save(encuesta);
-        return mapearAResponseDTO(actualizada);
-    }
-
-    public void eliminar(Long id) {
-        boolean existe = encuestaRepository.existsById(id);
-        if (!existe) {
-            throw new RuntimeException("No se puede eliminar. Encuesta no encontrada con id: " + id);
-        }
-        encuestaRepository.deleteById(id);
-    }
-
     public void activarEncuesta(Long id) {
         Encuesta encuesta = encuestaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Encuesta no encontrada con id: " + id));
@@ -109,10 +77,6 @@ public class EncuestaService {
         encuesta.setActiva(false);
         encuestaRepository.save(encuesta);
     }
-
-    // ==========================
-    //    MÉTODOS AUXILIARES
-    // ==========================
 
     private void validarOpciones(List<String> opciones) {
         if (opciones == null || opciones.size() < 2) {
@@ -147,4 +111,33 @@ public class EncuestaService {
 
         return dto;
     }
+
+    @Transactional
+    public EncuestaResponseDTO actualizarEncuesta(Long id, EncuestaUpdateDTO dto) {
+        Encuesta encuesta = encuestaRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Encuesta no encontrada"));
+
+        if (dto.getPregunta() != null && !dto.getPregunta().isBlank()) {
+            encuesta.setPregunta(dto.getPregunta().trim());
+        }
+
+        if (dto.getDescripcion() != null) {
+            encuesta.setDescripcion(dto.getDescripcion().trim());
+        }
+
+        if (dto.getActiva() != null) {
+            encuesta.setActiva(dto.getActiva());
+        }
+
+        return mapearAResponseDTO(encuesta);
+    }
+
+    @Transactional
+    public void eliminarEncuesta(Long id) {
+        if (!encuestaRepository.existsById(id)) {
+            throw new EntityNotFoundException("Encuesta no encontrada");
+        }
+        encuestaRepository.deleteById(id);
+    }
+
 }
