@@ -18,7 +18,6 @@ public class VotoController {
         this.votoService = votoService;
     }
 
-    // POST /api/encuestas/{encuestaId}/votos -> registrar voto
     @PostMapping("/votos")
     public ResponseEntity<Void> registrarVoto(@PathVariable Long encuestaId,
                                               @Valid @RequestBody VotoRequestDTO request) {
@@ -26,7 +25,6 @@ public class VotoController {
         return ResponseEntity.ok().build();
     }
 
-    // GET /api/encuestas/{encuestaId}/resultados -> obtener resultados
     @GetMapping("/resultados")
     public ResponseEntity<ResultadoEncuestaDTO> obtenerResultados(@PathVariable Long encuestaId) {
         ResultadoEncuestaDTO dto = votoService.obtenerResultados(encuestaId);

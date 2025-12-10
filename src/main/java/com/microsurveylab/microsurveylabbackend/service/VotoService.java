@@ -31,10 +31,6 @@ public class VotoService {
         this.votoRepository = votoRepository;
     }
 
-    // ==========================
-    //       REGISTRAR VOTO
-    // ==========================
-
     public void registrarVoto(Long encuestaId, VotoRequestDTO request) {
         Encuesta encuesta = encuestaRepository.findById(encuestaId)
                 .orElseThrow(() -> new RuntimeException("Encuesta no encontrada con id: " + encuestaId));
@@ -47,7 +43,6 @@ public class VotoService {
         Opcion opcion = opcionRepository.findById(opcionId)
                 .orElseThrow(() -> new RuntimeException("Opción no encontrada con id: " + opcionId));
 
-        // Validar que la opción pertenece a esa encuesta
         if (!opcion.getEncuesta().getId().equals(encuesta.getId())) {
             throw new IllegalArgumentException("La opción no pertenece a la encuesta especificada");
         }
@@ -58,10 +53,6 @@ public class VotoService {
 
         votoRepository.save(voto);
     }
-
-    // ==========================
-    //      RESULTADOS ENCUESTA
-    // ==========================
 
     public ResultadoEncuestaDTO obtenerResultados(Long encuestaId) {
         Encuesta encuesta = encuestaRepository.findById(encuestaId)

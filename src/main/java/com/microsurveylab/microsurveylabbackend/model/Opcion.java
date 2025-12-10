@@ -17,8 +17,6 @@ public class Opcion {
 
     public Opcion() { }
 
-    // Getters y setters
-
     public Long getId() {
         return id;
     }

@@ -101,10 +101,8 @@ public class EncuestaService {
         Encuesta encuesta = encuestaRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Encuesta no encontrada"));
 
-        // Primero borramos votos ligados a la encuesta
         votoRepository.deleteByEncuesta(encuesta);
 
-        // Después borramos la encuesta (las opciones se eliminan por orphanRemoval)
         encuestaRepository.delete(encuesta);
     }
 

@@ -7,8 +7,6 @@ public class ResultadoOpcionDTO {
     private long totalVotos;
     private double porcentaje;
 
-    // Getters y setters
-
     public Long getOpcionId() {
         return opcionId;
     }

@@ -8,8 +8,6 @@ public class ResultadoEncuestaDTO {
     private String pregunta;
     private List<ResultadoOpcionDTO> resultados;
 
-    // Getters y setters
-
     public Long getEncuestaId() {
         return encuestaId;
     }

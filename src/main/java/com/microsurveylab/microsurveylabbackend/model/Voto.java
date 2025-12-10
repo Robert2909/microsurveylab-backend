@@ -23,8 +23,6 @@ public class Voto {
 
     public Voto() { }
 
-    // Getters y setters
-
     public Long getId() {
         return id;
     }

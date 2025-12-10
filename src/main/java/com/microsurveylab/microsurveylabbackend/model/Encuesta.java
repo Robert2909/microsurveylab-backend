@@ -25,8 +25,6 @@ public class Encuesta {
 
     public Encuesta() { }
 
-    // Getters y setters
-
     public Long getId() {
         return id;
     }
