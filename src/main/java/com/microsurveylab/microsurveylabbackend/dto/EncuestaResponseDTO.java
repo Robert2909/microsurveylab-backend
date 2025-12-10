@@ -33,8 +33,6 @@ public class EncuestaResponseDTO {
         }
     }
 
-    // Getters y setters
-
     public Long getId() {
         return id;
     }

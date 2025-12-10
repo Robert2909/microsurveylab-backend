@@ -23,25 +23,21 @@ public class VotoService {
     private final OpcionRepository opcionRepository;
     private final VotoRepository votoRepository;
 
-    public VotoService(EncuestaRepository encuestaRepository,
-                       OpcionRepository opcionRepository,
-                       VotoRepository votoRepository) {
+    public VotoService(EncuestaRepository encuestaRepository, OpcionRepository opcionRepository, VotoRepository votoRepository) {
         this.encuestaRepository = encuestaRepository;
         this.opcionRepository = opcionRepository;
         this.votoRepository = votoRepository;
     }
 
     public void registrarVoto(Long encuestaId, VotoRequestDTO request) {
-        Encuesta encuesta = encuestaRepository.findById(encuestaId)
-                .orElseThrow(() -> new RuntimeException("Encuesta no encontrada con id: " + encuestaId));
+        Encuesta encuesta = encuestaRepository.findById(encuestaId).orElseThrow(() -> new RuntimeException("Encuesta no encontrada con id: " + encuestaId));
 
         if (Boolean.FALSE.equals(encuesta.getActiva())) {
             throw new IllegalArgumentException("La encuesta está inactiva y no acepta más votos");
         }
 
         Long opcionId = request.getOpcionId();
-        Opcion opcion = opcionRepository.findById(opcionId)
-                .orElseThrow(() -> new RuntimeException("Opción no encontrada con id: " + opcionId));
+        Opcion opcion = opcionRepository.findById(opcionId).orElseThrow(() -> new RuntimeException("Opción no encontrada con id: " + opcionId));
 
         if (!opcion.getEncuesta().getId().equals(encuesta.getId())) {
             throw new IllegalArgumentException("La opción no pertenece a la encuesta especificada");
@@ -55,8 +51,7 @@ public class VotoService {
     }
 
     public ResultadoEncuestaDTO obtenerResultados(Long encuestaId) {
-        Encuesta encuesta = encuestaRepository.findById(encuestaId)
-                .orElseThrow(() -> new RuntimeException("Encuesta no encontrada con id: " + encuestaId));
+        Encuesta encuesta = encuestaRepository.findById(encuestaId).orElseThrow(() -> new RuntimeException("Encuesta no encontrada con id: " + encuestaId));
 
         long totalVotos = votoRepository.countByEncuesta(encuesta);
 

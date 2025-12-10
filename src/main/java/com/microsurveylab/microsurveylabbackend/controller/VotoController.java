@@ -19,8 +19,7 @@ public class VotoController {
     }
 
     @PostMapping("/votos")
-    public ResponseEntity<Void> registrarVoto(@PathVariable Long encuestaId,
-                                              @Valid @RequestBody VotoRequestDTO request) {
+    public ResponseEntity<Void> registrarVoto(@PathVariable Long encuestaId, @Valid @RequestBody VotoRequestDTO request) {
         votoService.registrarVoto(encuestaId, request);
         return ResponseEntity.ok().build();
     }

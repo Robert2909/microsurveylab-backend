@@ -22,8 +22,7 @@ public class EncuestaService {
     private final EncuestaRepository encuestaRepository;
     private final VotoRepository votoRepository;
 
-    public EncuestaService(EncuestaRepository encuestaRepository,
-                           VotoRepository votoRepository) {
+    public EncuestaService(EncuestaRepository encuestaRepository, VotoRepository votoRepository) {
         this.encuestaRepository = encuestaRepository;
         this.votoRepository = votoRepository;
     }
