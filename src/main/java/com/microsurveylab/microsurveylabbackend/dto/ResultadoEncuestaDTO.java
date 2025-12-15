@@ -2,6 +2,14 @@ package com.microsurveylab.microsurveylabbackend.dto;
 
 import java.util.List;
 
+/**
+ * DTO que representa el resultado completo de una encuesta.
+ *
+ * Se usa cuando el frontend pide ver resultados:
+ * - identifica la encuesta
+ * - muestra la pregunta
+ * - incluye el resumen por opción
+ */
 public class ResultadoEncuestaDTO {
 
     private Long encuestaId;

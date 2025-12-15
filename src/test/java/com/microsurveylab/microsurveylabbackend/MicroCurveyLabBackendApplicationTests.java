@@ -1,4 +1,4 @@
-package com.microsurveylab.microsurveylab_backend;
+package com.microsurveylab.microsurveylabbackend;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

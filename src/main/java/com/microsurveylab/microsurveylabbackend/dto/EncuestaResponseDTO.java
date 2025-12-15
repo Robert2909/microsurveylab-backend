@@ -3,6 +3,14 @@ package com.microsurveylab.microsurveylabbackend.dto;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * DTO que el backend regresa al frontend cuando se consulta una encuesta.
+ *
+ * Trae lo necesario para:
+ * - listar encuestas
+ * - ver detalle
+ * - mostrar opciones disponibles
+ */
 public class EncuestaResponseDTO {
 
     private Long id;
@@ -12,6 +20,10 @@ public class EncuestaResponseDTO {
     private LocalDateTime fechaCreacion;
     private List<OpcionRespuestaDTO> opciones;
 
+    /**
+     * Sub-DTO para no regresar toda la entidad Opcion.
+     * Aquí solo mandamos id y texto, que es lo que el frontend ocupa.
+     */
     public static class OpcionRespuestaDTO {
         private Long id;
         private String texto;

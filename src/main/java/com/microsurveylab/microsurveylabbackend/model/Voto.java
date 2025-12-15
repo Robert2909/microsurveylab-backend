@@ -1,9 +1,15 @@
 package com.microsurveylab.microsurveylabbackend.model;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 
+/**
+ * Entidad que representa un voto.
+ *
+ * Un voto siempre está ligado a:
+ * - una encuesta
+ * - una opción
+ */
 @Entity
 public class Voto {
 
@@ -11,14 +17,22 @@ public class Voto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * Encuesta a la que pertenece el voto.
+     * Relación many-to-one porque una encuesta tiene muchos votos.
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "encuesta_id")
     private Encuesta encuesta;
 
+    /**
+     * Opción seleccionada por el voto.
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "opcion_id")
     private Opcion opcion;
 
+    // Se asigna automáticamente al registrar el voto.
     private LocalDateTime fechaVoto = LocalDateTime.now();
 
     public Voto() { }

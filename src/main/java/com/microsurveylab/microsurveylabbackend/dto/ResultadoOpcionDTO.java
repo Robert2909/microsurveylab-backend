@@ -1,5 +1,14 @@
 package com.microsurveylab.microsurveylabbackend.dto;
 
+/**
+ * DTO que representa el resultado de una opción dentro de una encuesta.
+ *
+ * Aquí ya viene la información calculada:
+ * - total de votos
+ * - porcentaje respecto al total
+ *
+ * El frontend solo se encarga de mostrarlo.
+ */
 public class ResultadoOpcionDTO {
 
     private Long opcionId;

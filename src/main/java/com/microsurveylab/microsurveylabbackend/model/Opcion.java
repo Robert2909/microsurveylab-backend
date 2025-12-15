@@ -2,6 +2,11 @@ package com.microsurveylab.microsurveylabbackend.model;
 
 import jakarta.persistence.*;
 
+/**
+ * Entidad que representa una opción dentro de una encuesta.
+ *
+ * Cada opción pertenece a una sola encuesta.
+ */
 @Entity
 public class Opcion {
 
@@ -11,6 +16,12 @@ public class Opcion {
 
     private String texto;
 
+    /**
+     * Muchas opciones pueden pertenecer a una encuesta.
+     *
+     * fetch LAZY para evitar cargar la encuesta completa
+     * cuando solo se necesita la opción.
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "encuesta_id")
     private Encuesta encuesta;

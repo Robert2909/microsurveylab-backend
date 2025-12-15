@@ -10,11 +10,20 @@ import com.microsurveylab.microsurveylabbackend.repository.EncuestaRepository;
 import com.microsurveylab.microsurveylabbackend.repository.OpcionRepository;
 import com.microsurveylab.microsurveylabbackend.repository.VotoRepository;
 import jakarta.transaction.Transactional;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Service encargado de registrar votos y armar resultados.
+ *
+ * Reglas básicas que se cuidan aquí:
+ * - No se vota si la encuesta está inactiva
+ * - La opción elegida debe pertenecer a la encuesta
+ * - Los resultados se calculan con base en conteos de la BD
+ */
 @Service
 @Transactional
 public class VotoService {
@@ -29,16 +38,21 @@ public class VotoService {
         this.votoRepository = votoRepository;
     }
 
+    // Registra un voto para una encuesta y una opción.
     public void registrarVoto(Long encuestaId, VotoRequestDTO request) {
-        Encuesta encuesta = encuestaRepository.findById(encuestaId).orElseThrow(() -> new RuntimeException("Encuesta no encontrada con id: " + encuestaId));
+        Encuesta encuesta = encuestaRepository.findById(encuestaId)
+                .orElseThrow(() -> new EntityNotFoundException("Encuesta no encontrada con id: " + encuestaId));
 
+        // Si está inactiva, se corta aquí para no guardar nada.
         if (Boolean.FALSE.equals(encuesta.getActiva())) {
             throw new IllegalArgumentException("La encuesta está inactiva y no acepta más votos");
         }
 
         Long opcionId = request.getOpcionId();
-        Opcion opcion = opcionRepository.findById(opcionId).orElseThrow(() -> new RuntimeException("Opción no encontrada con id: " + opcionId));
+        Opcion opcion = opcionRepository.findById(opcionId)
+                .orElseThrow(() -> new EntityNotFoundException("Opción no encontrada con id: " + opcionId));
 
+        // Evita que se vote por una opción que ni siquiera es de esa encuesta.
         if (!opcion.getEncuesta().getId().equals(encuesta.getId())) {
             throw new IllegalArgumentException("La opción no pertenece a la encuesta especificada");
         }
@@ -50,11 +64,12 @@ public class VotoService {
         votoRepository.save(voto);
     }
 
+    // Calcula resultados (totales y porcentajes) para mostrar en el frontend.
     public ResultadoEncuestaDTO obtenerResultados(Long encuestaId) {
-        Encuesta encuesta = encuestaRepository.findById(encuestaId).orElseThrow(() -> new RuntimeException("Encuesta no encontrada con id: " + encuestaId));
+        Encuesta encuesta = encuestaRepository.findById(encuestaId)
+                .orElseThrow(() -> new EntityNotFoundException("Encuesta no encontrada con id: " + encuestaId));
 
         long totalVotos = votoRepository.countByEncuesta(encuesta);
-
         List<ResultadoOpcionDTO> resultados = new ArrayList<>();
 
         encuesta.getOpciones().forEach(opcion -> {
